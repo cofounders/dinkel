@@ -1,0 +1,33 @@
+{
+  "name": "dinkel",
+  "version": "0.0.0",
+  "description": "Healthy and nutricious micro-framework for API consumption",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cofounders/dinkel.git"
+  },
+  "keywords": [
+    "api",
+    "framework",
+    "mvc",
+    "rest",
+    "restful",
+    "http",
+    "model",
+    "collection"
+  ],
+  "author": "Sebastiaan Deckers <seb@ninja.sg>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/cofounders/dinkel/issues"
+  },
+  "homepage": "https://github.com/cofounders/dinkel",
+  "dependencies": {
+    "mocha": "^1.18.2",
+    "chai": "^1.9.1"
+  }
+}
