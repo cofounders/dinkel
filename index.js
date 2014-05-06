@@ -55,7 +55,7 @@ var ajax = function (method, url) {
           }
           resolve(response);
         } else {
-          reject(Error('HTTP error: ' + xhr.status));
+          reject(Error(xhr.statusText));
         }
       }
     };
