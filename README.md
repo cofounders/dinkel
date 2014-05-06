@@ -1,6 +1,7 @@
 # Dinkel
 
-A nutritious grain to create friendly, consumable API functions and to create delicious bread.
+A nutritious grain to create friendly, consumable API functions.  
+Dinkels are also used to create delicious bread.
 
 ## Test
 
