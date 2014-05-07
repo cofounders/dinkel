@@ -47,13 +47,7 @@ var ajax = function (method, url) {
     xhr.onreadystatechange = function () {
       if (xhr.readyState === 4) {
         if (xhr.status === 200) {
-          try {
-            var response = JSON.parse(xhr.responseText);
-          }
-          catch (err) {
-            reject(err);
-          }
-          resolve(response);
+          resolve(JSON.parse(xhr.responseText));
         } else {
           reject(Error(xhr.statusText));
         }
@@ -61,7 +55,7 @@ var ajax = function (method, url) {
     };
     xhr.open(method, url);
     xhr.send();
-  }.bind(this));
+  });
 };
 
 'get post put delete'
