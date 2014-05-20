@@ -7,28 +7,26 @@ var Dinkel = require('../index.js');
 
 var base = 'http://localhost:7357/?sort=name&color';
 var endpoints = require('./fixtures/endpoints.js');
-var config = {
-  onrequest: function (xhr, method, json, promise) {
-    xhr.setCustomHeader('Authentication', 'Bearer ' + localStorage.getItem('token'));
-  }
-};
+var config = {};
 
 describe('Dinkel', function () {
-  describe('interface', function () {
-    it('loads fine', function () {
+  describe('has an interface', function () {
+    it('that loads fine', function () {
       expect(Dinkel).to.exist;
     });
-    it('has the right signature', function () {
+
+    it('that has the right function signature', function () {
       expect(Dinkel).to.have.length(3);
     });
   });
 
-  describe('invoking', function () {
-    it('invokes using `new`', function () {
+  describe('can be invoked', function () {
+    it('as a constructor with "new"', function () {
       var api = new Dinkel(base, endpoints, config);
       expect(api).to.be.ok;
     });
-    it('invokes as a function call', function () {
+
+    it('as a function call', function () {
       var api = Dinkel(base, endpoints, config);
       expect(api).to.be.ok;
     });
@@ -38,33 +36,70 @@ describe('Dinkel', function () {
 describe('Handler', function () {
   var app;
   var server;
+
+  var trackAjaxHandler = false;
+  var trackBeforeSend = false;
+
+  var api = new Dinkel(base, endpoints, {
+    ajax: function (xhr, method, json, promise) {
+      trackAjaxHandler = true;
+      return Dinkel.ajax.apply(this, arguments);
+    },
+    beforeSend: function (xhr) {
+      trackBeforeSend = true;
+    }
+  });
+
   before(function () {
     app = express()
-      // .use(morgan())
+      .use(morgan())
       .use(serveStatic('test/fixtures'));
     server = app.listen(7357);
   });
+
   after(function () {
     server.close();
   });
 
-  var api = new Dinkel(base, endpoints, config);
   it('creates an interface', function () {
     expect(api).to.exist;
   });
+
   it('has endpoints', function () {
     expect(api).to.have.property('Fruits')
-      .that.is.an('object')
-      .that.has.a.property('get')
+      .that.is.an('object');
+    expect(api).to.have.property('FruitsSpecialsDaily')
+      .that.is.an('object');
+    expect(api).to.have.property('Veggies')
+      .that.is.an('object');
+    expect(api).to.have.property('Nuts')
+      .that.is.an('object');
+  });
+
+  it('has HTTP methods', function () {
+    expect(api).to.have.deep.property('Fruits.get')
+      .that.is.a('function');
+    expect(api).to.have.deep.property('Nuts.post')
+      .that.is.a('function');
+    expect(api).to.have.deep.property('Nuts.put')
+      .that.is.a('function');
+    expect(api).to.have.deep.property('Nuts.delete')
       .that.is.a('function');
   });
-  describe('making XHR calls', function (done) {
+
+  it('uses custom endpoint options', function () {
+    expect(api).to.have.a.property('Serials');
+  });
+
+  describe('makes XHR calls', function (done) {
     var data = {};
+    var response = {};
     var promise;
+
     before(function () {
       promise = api.Fruits.get({
         id: 'banana'
-      }, data);
+      }, data, response);
     });
 
     it('returns a promise', function () {
@@ -74,21 +109,30 @@ describe('Handler', function () {
         .that.is.a('function');
     });
 
-    it('exposes the JSON data object', function () {
-      expect(promise).to.have.a.property('json');
-      expect(promise.json()).to.equal(data);
+    it('exposes the JSON response object', function () {
+      expect(promise).to.have.a.property('response');
+      expect(promise.response()).to.equal(response);
     });
 
-    it('fetches the data', function () {
+    it('fetches the response', function () {
       promise
-        .then(function (response) {
-          expect(response).to.equal(data);
-          expect(data).to.have.a.property('name');
+        .then(function (json) {
+          expect(json).to.equal(response);
+          expect(json).to.have.a.property('name')
+            .that.equals('banana');
           done();
         })
         .catch(function (err) {
           done(err || Error('Not sure what went wrong'));
         });
+    });
+
+    it('invokes a "beforeSend" callback', function () {
+      expect(trackBeforeSend).to.be.true;
+    });
+
+    it('invokes a custom "ajax" provider', function () {
+      expect(trackAjaxHandler).to.be.true;
     });
   });
 });
